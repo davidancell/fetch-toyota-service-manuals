@@ -7,6 +7,7 @@ export interface CLIArgs {
   password: string;
   headed: boolean;
   cookieString?: string;
+  browserLogin: boolean;
 }
 
 export default function processCLIArgs(): CLIArgs {
@@ -39,6 +40,12 @@ export default function processCLIArgs(): CLIArgs {
       type: String,
     },
     {
+      name: "browser-login",
+      alias: "b",
+      type: Boolean,
+      defaultOption: false,
+    },
+    {
       name: "help",
       type: Boolean,
     },
@@ -60,25 +67,31 @@ export default function processCLIArgs(): CLIArgs {
             "{bold Required.} Manual ID(s) to download. Use multiple times for multiple manuals. For non-electrical manuals, add @YEAR to the end to only download pages for that year.",
         },
         {
+          name: "browser-login -b",
+          typeLabel: " ",
+          description:
+            "{bold Recommended for 2FA.} Opens a browser window where you can manually log in (including 2FA), then automatically extracts cookies.",
+        },
+        {
           name: "email -e",
           typeLabel: "{underline me@example.com}",
-          description: "{bold Required.} Your TIS email.",
+          description: "Your TIS email. {bold Note:} May not work with 2FA enabled. Use --browser-login instead.",
         },
         {
           name: "password -p",
           typeLabel: "{underline abc1234}",
-          description: "{bold Required.} Your TIS password.",
+          description: "Your TIS password. {bold Note:} May not work with 2FA enabled. Use --browser-login instead.",
         },
         {
           name: "cookie-string -c",
           typeLabel: "{underline abc1234}",
           description:
-            "Your TIS cookie string. If you don't know what this is, don't use it.",
+            "Your TIS cookie string. Advanced option - if you manually extracted cookies from browser.",
         },
         {
           name: "headed -h",
           typeLabel: " ",
-          description: "Run in headed mode (show the emulated browser).",
+          description: "Run in headed mode (show the emulated browser during downloads).",
         },
         {
           name: "help",
@@ -100,7 +113,7 @@ export default function processCLIArgs(): CLIArgs {
 
     if (
       !options.manual ||
-      ((!options.email || !options.password) && !options["cookie-string"])
+      ((!options.email || !options.password) && !options["cookie-string"] && !options["browser-login"])
     ) {
       console.error("Missing required args!");
       // console.log(options);
@@ -114,6 +127,7 @@ export default function processCLIArgs(): CLIArgs {
       password: options.password,
       headed: options.headed,
       cookieString: options["cookie-string"],
+      browserLogin: options["browser-login"],
     };
   } catch (e: any) {
     console.error(e);

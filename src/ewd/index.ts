@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import parseTitle from "./parseTitle";
 import saveStream from "../api/saveStream";
 import { Manual } from "..";
+import sanitizeFilename from "../utils/sanitizeFilename";
 
 export default async function downloadEWD(manualData: Manual, path: string) {
   const parts = ["system", "routing", "overall"];
@@ -71,7 +72,8 @@ export default async function downloadEWD(manualData: Manual, path: string) {
         responseType: isPdf ? "stream" : "text",
       });
 
-      const filePath = join(partPath, `${fileName}.${fileExt}`);
+      const sanitizedFileName = sanitizeFilename(fileName);
+      const filePath = join(partPath, `${sanitizedFileName}.${fileExt}`);
       if (isPdf) {
         // response is stream, save as such
         await saveStream(fileReq.data, filePath);

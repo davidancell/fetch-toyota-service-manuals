@@ -29,7 +29,7 @@
     "typescript": "^4.6.4"
   },
   "scripts": {
-    "start": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node src/index.ts",
+    "start": "ts-node src/index.ts",
     "start:inspect": "NODE_TLS_REJECT_UNAUTHORIZED=0 node -r ts-node/register --inspect-brk src/index.ts",
     "format": "prettier --write src/**/*.ts",
     "playwright-setup": "playwright install chromium && playwright install-deps chromium",

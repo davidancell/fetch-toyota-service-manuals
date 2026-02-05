@@ -68,10 +68,19 @@ And, yes, you can specify a year that the car wasn't made in-- but, if you do, t
 
 ### Download your manuals!
 
-To download manuals, run `yarn start -e YOUREMAIL -p YOURPASSWORD -m MANUALID -m ANOTHERMANUALID -m ...` with
-the manual IDs replaced with yours. You can use `-m` an unlimited number of times.
+**If you have 2FA enabled (recommended method):**
 
-The script will automatically log in as you, read each manual's Table of Contents, and download every page unless you specify a year-- see [above](#decide-if-you-only-want-your-model-years-pages).
+Run `yarn start --browser-login -m MANUALID -m ANOTHERMANUALID -m ...` with the manual IDs replaced with yours.
+
+A browser window will open automatically. Log in to TIS in that window (including completing 2FA if required). Once you're logged in and see the TIS homepage, the script will automatically extract your session and begin downloading.
+
+**If you don't have 2FA enabled (legacy method):**
+
+Run `yarn start -e YOUREMAIL -p YOURPASSWORD -m MANUALID -m ANOTHERMANUALID -m ...` with your credentials and manual IDs.
+
+**Note:** You can use `-m` an unlimited number of times for multiple manuals.
+
+The script will automatically read each manual's Table of Contents and download every page unless you specify a year-- see [above](#decide-if-you-only-want-your-model-years-pages).
 
 **DO NOT log in to TIS while the bot is downloading.** TIS enforces a one-session-at-a-time policy, and if
 you log in while it's downloading you'll have to start over. If you know what you're doing, you can use your browser Cookie to log in instead of your email and password. See [the command-line options](#all-command-line-options) for more info.
@@ -130,19 +139,23 @@ Toyota/Lexus/Scion Workshop Manual Downloader
 
 Options
 
-  --manual -m RM12345          Required. Manual ID(s) to download. Use multiple times for multiple manuals.
-                               For non-electrical manuals, add @YEAR to the end to only download pages for
-                               that year.
-  --email -e me@example.com    Required. Your TIS email.
-  --password -p abc1234        Required. Your TIS password.
-  --cookie-string -c abc1234   Your TIS cookie string. If you don't know what this is, don't use it.
-  --headed -h                  Run in headed mode (show the emulated browser).
-  --help                       Print this usage guide.
+  --manual -m RM12345            Required. Manual ID(s) to download. Use multiple times for multiple manuals.
+                                 For non-electrical manuals, add @YEAR to the end to only download pages for
+                                 that year.
+  --browser-login -b             Recommended for 2FA. Opens a browser window where you can manually log in
+                                 (including 2FA), then automatically extracts cookies.
+  --email -e me@example.com      Your TIS email. Note: May not work with 2FA enabled. Use --browser-login instead.
+  --password -p abc1234          Your TIS password. Note: May not work with 2FA enabled. Use --browser-login instead.
+  --cookie-string -c abc1234     Your TIS cookie string. Advanced option - if you manually extracted cookies from browser.
+  --headed -h                    Run in headed mode (show the emulated browser during downloads).
+  --help                         Print this usage guide.
 ```
 
-- To use cookie-based authentication, copy the value of your Cookie header when visiting a manual page. If you're not sure what this is or how to do it, just use the email/password authentication method. When using cookie-based authentication, you don't need to specify an email or password, and your session will be preserved on the browser, so you can use TIS while the bot downloads manuals.
+- **Browser login (--browser-login)**: The recommended method if you have 2FA enabled. Opens a browser window, lets you log in manually, then automatically extracts and uses your session cookies. Your session will be preserved, so you can continue using TIS while the bot downloads manuals.
+- **Cookie-based authentication (--cookie-string)**: Advanced option. Copy the value of your Cookie header when visiting a manual page. If you're not sure what this is or how to do it, use --browser-login instead.
   - If you're on a POSIX system, consider wrapping your cookie string in single quotes to avoid the shell interpreting it.
-- Headed mode is not recommended for use. It requires the device you're using to have a display, and it's slower than headless mode.
+- **Email/password authentication**: Legacy method that may not work if 2FA is enabled on your account.
+- **Headed mode (--headed)**: Shows the browser window during the download process. Not required for --browser-login (which always shows the login window).
 
 ## FAQ
 
