@@ -1,5 +1,6 @@
 import processCLIArgs, {CLIArgs} from "./processCLIArgs";
 import login from "./api/login";
+import browserLogin from "./api/browserLogin";
 import {join, resolve} from "path";
 import {mkdir, readFile, writeFile} from "fs/promises";
 import downloadEWD from "./ewd";
@@ -15,7 +16,7 @@ export interface Manual {
   raw: string; // e.g. EM1234@2019
 }
 
-async function run({manual, email, password, headed, cookieString}: CLIArgs) {
+async function run({manual, email, password, headed, cookieString, browserLogin: useBrowserLogin}: CLIArgs) {
   // sort manuals and make sure that they're valid (ish)
   const ewds: Manual[] = [];
   const genericManuals: Manual[] = [];
@@ -104,20 +105,20 @@ async function run({manual, email, password, headed, cookieString}: CLIArgs) {
     console.error("Unable to copy accessor file into manuals.", e)
   }
 
-  console.log("Setting up Playwright...");
-  const browser = await chromium.launch({
-    headless: !headed,
-  });
-
   let transformedCookies: Cookie[] = [];
 
-  if (email && password) {
+  if (useBrowserLogin) {
+    // Use interactive browser login - opens a browser for manual login including 2FA
+    transformedCookies = await browserLogin(headed);
+  } else if (email && password) {
     console.log("Logging into TIS using email and password...");
+    console.log("WARNING: This method may not work if 2FA is enabled. Use --browser-login instead.");
     // login and get cookies
     try {
       await login(email, password);
     } catch (e: any) {
       console.log("Error logging in. Please check your username and password.");
+      console.log("If you have 2FA enabled, use --browser-login (-b) instead.");
       console.log(e.toString());
       return;
     }
@@ -166,10 +167,15 @@ async function run({manual, email, password, headed, cookieString}: CLIArgs) {
     });
   } else {
     console.log(
-      "No credentials provided. Please provide either a cookie string or email/password."
+      "No credentials provided. Please provide either --browser-login, --cookie-string, or email/password."
     );
     process.exit(1);
   }
+
+  console.log("Setting up Playwright...");
+  const browser = await chromium.launch({
+    headless: !headed,
+  });
 
   const page = await browser.newPage({
     acceptDownloads: false,
